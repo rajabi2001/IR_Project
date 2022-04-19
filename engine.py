@@ -9,7 +9,7 @@ from collections import defaultdict
 
 def create_dectionary(mydict ,stemmer ,mystopwordset):
 
-    with open("IR_data_news_12k.json") as f:
+    with open("IR_data_news_10.json") as f:
         data = f.read()
     jsondata = json.loads(data)
 
@@ -90,25 +90,61 @@ def subtract(list1, list2):
         newresult.append(i)
     
     return newresult
-        
+
+def finish():
+    print("There is nothing for you")
+    exit()       
 
 if __name__ == "__main__":
-
-    print("enter what you want to search")
-    inputlist =  list(filter(None, input().replace('"',' ').split(' ')))
-    # print(inputlist)
 
     mydict = defaultdict(list)
     stemmer = Stemmer()
     mystopwordset = set(stopwords_list())
+    rankdict = defaultdict(int)
+    resault = []
 
     create_dectionary(mydict ,stemmer ,mystopwordset)
 
-    resault = search_dictionary(inputlist[0] , mydict ,stemmer)
 
-    rankdict = defaultdict(int)
-    ranked = ranked_results(resault[1] ,rankdict)
-    print(ranked)
+    print("enter what you want to search")
+    myinput = input()
+
+    if myinput[0] == '"':
+        #phrase search
+        search_terms =  list(filter(None, myinput.replace('"',' ').split(' ')))
+        type_search = 0
+    else:
+        # seperate words search 
+        search_terms =  list(filter(None, myinput.split(' ')))
+        intersect_list = []
+        subtract_list = []
+        is_sub = 0
+        for i in search_terms:
+            if i == '!':
+                is_sub = 1
+                continue
+            search_resualt = search_dictionary(i , mydict ,stemmer)
+            if len(search_resualt) == 0:
+                finish()
+            if is_sub == 1:
+                subtract_list.append(search_dictionary(i , mydict ,stemmer))
+                is_sub = 0
+                continue
+            intersect_list.append(search_dictionary(i , mydict ,stemmer))
+
+        resault = intersect_list.pop()[1]
+        for i in intersect_list:
+            resault = intersect(i[1], resault)
+        for i in subtract_list:
+            resault = subtract(resault ,i[1])
+
+
+
+        # resault = search_dictionary(search_terms[0] , mydict ,stemmer)
+
+        
+        ranked = ranked_results(resault ,rankdict)
+        print(ranked)
 
     
     
