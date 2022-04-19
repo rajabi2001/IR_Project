@@ -27,7 +27,11 @@ for i in range(len(jsondata)):
             continue
 
         thistoken = stemmer.stem(thistoken)
+        
+        if len(thistoken) == 0 :
+            continue
 
+        # print(thistoken)
         if len(mydict[thistoken]) == 0 :
             mydict[thistoken].append(1)
             mydict[thistoken].append(list())
@@ -36,10 +40,11 @@ for i in range(len(jsondata)):
             mydict[thistoken][0] += 1
         
         mydict[thistoken][1].append([i,j]) 
-
-
     
-# print(mydict['ورزش'])
+
+print("enter what you want to search")
+searchterm = stemmer.stem(input())
+print(mydict[searchterm])
     
 
 
