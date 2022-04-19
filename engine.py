@@ -61,9 +61,36 @@ def ranked_results(resault ,rankdict):
 
     return newresault
 
-    
-    
 
+def intersect(list1, list2):
+    i = 0
+    j = 0
+    result = []
+    while i < len(list1) and j < len(list2):
+        if list1[i][0] == list2[j][0]:
+            result.append(list1[i])
+            i += 1
+            j += 1
+        elif list1[i][0] < list2[j][0]:
+            i += 1
+        else:
+            j += 1
+    return result
+
+
+def subtract(list1, list2):
+
+    newresult = []
+    doclist2 = []
+    for i in list2:
+        doclist2.append(i[0])
+    for i in list1:
+        if i[0] in doclist2:
+            continue
+        newresult.append(i)
+    
+    return newresult
+        
 
 if __name__ == "__main__":
 
