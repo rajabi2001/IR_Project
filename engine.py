@@ -8,41 +8,38 @@ from collections import defaultdict
 
 stemmer = Stemmer()
 mydict = defaultdict(list)
+mystopwordset = set(stopwords_list())
 
-with open("IR_data_news_10.json") as f:
+with open("IR_data_news_12k.json") as f:
     data = f.read()
 jsondata = json.loads(data)
 
 tokenlist = list()
 for i in range(len(jsondata)):
     mytoken = word_tokenize(jsondata[str(i)]["content"].translate(str.maketrans('', '', string.punctuation)))
-    copymytoken = mytoken.copy()
-    for j in copymytoken:
-        if j in stopwords_list() or len(j) == 1 :
-            mytoken.remove(j)
+    mytoken = list(filter(None, mytoken))
 
     for j in range(len(mytoken)):
-        mytoken[j] = stemmer.stem(mytoken[j])
+        # i -> doc , j -> position
+        thistoken = mytoken[j]
 
-    mytoken = list(filter(None, mytoken))
-    tokenlist.append(mytoken)
+        if thistoken in mystopwordset or len(thistoken) == 1 :
+            continue
 
-# print(tokenlist)
+        thistoken = stemmer.stem(thistoken)
 
-for i in range(len(tokenlist)):
-    for j in range(len(tokenlist[i])):
-        thistoken = tokenlist[i][j]
         if len(mydict[thistoken]) == 0 :
             mydict[thistoken].append(1)
             mydict[thistoken].append(list())
             
         else :
             mydict[thistoken][0] += 1
-            
-        mydict[thistoken][1].append([i,j])  
-    
+        
+        mydict[thistoken][1].append([i,j]) 
 
-print(mydict['ورزش'])
+
+    
+# print(mydict['ورزش'])
     
 
 
