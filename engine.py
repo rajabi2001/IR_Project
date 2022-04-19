@@ -6,45 +6,84 @@ from hazm import stopwords_list
 import string
 from collections import defaultdict
 
-stemmer = Stemmer()
-mydict = defaultdict(list)
-mystopwordset = set(stopwords_list())
 
-with open("IR_data_news_12k.json") as f:
-    data = f.read()
-jsondata = json.loads(data)
+def create_dectionary(mydict ,stemmer ,mystopwordset):
 
-tokenlist = list()
-for i in range(len(jsondata)):
-    mytoken = word_tokenize(jsondata[str(i)]["content"].translate(str.maketrans('', '', string.punctuation)))
-    mytoken = list(filter(None, mytoken))
+    with open("IR_data_news_12k.json") as f:
+        data = f.read()
+    jsondata = json.loads(data)
 
-    for j in range(len(mytoken)):
-        # i -> doc , j -> position
-        thistoken = mytoken[j]
+    tokenlist = list()
+    for i in range(len(jsondata)):
+        mytoken = word_tokenize(jsondata[str(i)]["content"].translate(str.maketrans('', '', string.punctuation)))
+        mytoken = list(filter(None, mytoken))
 
-        if thistoken in mystopwordset or len(thistoken) == 1 :
-            continue
+        for j in range(len(mytoken)):
+            # i -> doc , j -> position
+            thistoken = mytoken[j]
 
-        thistoken = stemmer.stem(thistoken)
-        
-        if len(thistoken) == 0 :
-            continue
+            if thistoken in mystopwordset or len(thistoken) == 1 :
+                continue
 
-        # print(thistoken)
-        if len(mydict[thistoken]) == 0 :
-            mydict[thistoken].append(1)
-            mydict[thistoken].append(list())
+            thistoken = stemmer.stem(thistoken)
             
-        else :
-            mydict[thistoken][0] += 1
-        
-        mydict[thistoken][1].append([i,j]) 
+            if len(thistoken) == 0 :
+                continue
+
+            # print(thistoken)
+            if len(mydict[thistoken]) == 0 :
+                mydict[thistoken].append(1)
+                mydict[thistoken].append(list())
+                
+            else :
+                mydict[thistoken][0] += 1
+            
+            mydict[thistoken][1].append([i,j]) 
     
 
-print("enter what you want to search")
-searchterm = stemmer.stem(input())
-print(mydict[searchterm])
+def search_dictionary(term , mydict ,stemmer):
+    
+    term = stemmer.stem(term)
+    return mydict[term]
+
+
+def ranked_results(resault ,rankdict):
+
+    for i in resault:
+        rankdict[i[0]] += 1
+
+    newresault = []
+    
+    for key in rankdict:
+        newresault.append([key,rankdict[key]])
+
+    newresault.sort(key=lambda x: x[1],reverse=True)
+
+    return newresault
+
+    
+    
+
+
+if __name__ == "__main__":
+
+    print("enter what you want to search")
+    inputlist =  list(filter(None, input().replace('"',' ').split(' ')))
+    # print(inputlist)
+
+    mydict = defaultdict(list)
+    stemmer = Stemmer()
+    mystopwordset = set(stopwords_list())
+
+    create_dectionary(mydict ,stemmer ,mystopwordset)
+
+    resault = search_dictionary(inputlist[0] , mydict ,stemmer)
+
+    rankdict = defaultdict(int)
+    ranked = ranked_results(resault[1] ,rankdict)
+    print(ranked)
+
+    
     
 
 
