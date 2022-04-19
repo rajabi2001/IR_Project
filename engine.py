@@ -68,7 +68,12 @@ def intersect(list1, list2):
     result = []
     while i < len(list1) and j < len(list2):
         if list1[i][0] == list2[j][0]:
-            result.append(list1[i])
+
+            if list1[i][1] >= list2[j][1]:
+                result.append(list1[i])
+            else:
+                result.append(list2[j])
+
             i += 1
             j += 1
         elif list1[i][0] < list2[j][0]:
