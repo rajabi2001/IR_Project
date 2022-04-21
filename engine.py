@@ -104,7 +104,8 @@ def normelizer(text,stemmer ,mystopwordset):
     for i in range(len(text)):
         if text[i] in mystopwordset:
             continue
-        return_list.append([text[i],i])
+        stemm = stemmer.stem(text[i])
+        return_list.append([stemm,i])
     
     return return_list
 
@@ -263,6 +264,7 @@ if __name__ == "__main__":
         search_terms = myinput.pop(0)
         # print(search_terms)
         search_terms =  list(filter(None, search_terms.split(' ')))
+
         intersect_list = []
         subtract_list = []
         is_sub = 0
@@ -270,6 +272,8 @@ if __name__ == "__main__":
             if i == '!':
                 is_sub = 1
                 continue
+            
+            i = stemmer.stem(i)
             search_resualt = search_dictionary(i , mydict ,stemmer)
             if len(search_resualt) == 0:
                 finish()
