@@ -1,7 +1,4 @@
 
-# 1.combine two way searching -> done
-# 2.buil valid output
-
 
 import chunk
 import json
@@ -11,11 +8,7 @@ import string
 from collections import defaultdict
 
 
-def create_dectionary(mydict ,stemmer ,mystopwordset):
-
-    with open("IR_data_news_10.json") as f:
-        data = f.read()
-    jsondata = json.loads(data)
+def create_dectionary(mydict ,stemmer ,mystopwordset , jsondata):
 
     for i in range(len(jsondata)):
         mytoken = word_tokenize(jsondata[str(i)]["content"].translate(str.maketrans('', '', string.punctuation)))
@@ -62,7 +55,7 @@ def ranked_results(resault ,rankdict):
 
     newresault.sort(key=lambda x: x[1],reverse=True)
 
-    return newresault
+    return newresault[0:5]
 
 
 def intersect(list1, list2):
@@ -179,14 +172,20 @@ def intersect2(list1, list2, index):
 
 if __name__ == "__main__":
 
+    with open("IR_data_news_10.json") as f:
+        data = f.read()
+    jsondata = json.loads(data)
+
     mydict = defaultdict(list)
     stemmer = Stemmer()
     mystopwordset = set(stopwords_list())
     rankdict = defaultdict(int)
-    resault = []
+    resault1 = []
+    resault2 = []
     isphrase = False
+    iscombined = False
 
-    create_dectionary(mydict ,stemmer ,mystopwordset)
+    create_dectionary(mydict ,stemmer ,mystopwordset , jsondata)
 
 
     print("enter what you want to search")
@@ -245,7 +244,7 @@ if __name__ == "__main__":
                 continue
 
             if whichunk == (len(chunklist) - 1):
-                resault.append(predoc)
+                resault1.append(predoc)
                 whichunk = 0
                 continue
             
@@ -257,6 +256,10 @@ if __name__ == "__main__":
 
     if len(myinput) > 0:
         # seperate words search 
+
+        if isphrase == True:
+            iscombined == True
+
         search_terms = myinput.pop(0)
         # print(search_terms)
         search_terms =  list(filter(None, search_terms.split(' ')))
@@ -283,13 +286,37 @@ if __name__ == "__main__":
             combinelist = subtract(combinelist ,i[1])
         
         for i in combinelist:
-            resault.append(i[0])
+            resault2.append(i[0])
 
         # print(resault)
 
 
-    ranked = ranked_results(resault ,rankdict)
-    print(ranked)
+    if iscombined == True:
+
+        rankedlist1 = ranked_results(resault1 ,rankdict)
+        rankedlist = defaultdict(int)
+        rankedlist2 = ranked_results(resault2 ,rankdict)
+        rankedlist = intersect(rankedlist1,rankedlist2)
+
+    elif isphrase == True:
+        rankedlist = ranked_results(resault1 ,rankdict)
+    else:
+        rankedlist = ranked_results(resault2 ,rankdict)
+
+    # print(rankedlist1)
+    # print(rankedlist2)
+    # print(rankedlist)
+
+
+
+    for i in rankedlist:
+        print("#############")
+        print("Title : ",end='')
+        print(jsondata[str(i[0])]['title'])
+        print("URL : ",end='')
+        print(jsondata[str(i[0])]['url'])
+        print()
+        
 
     
     
