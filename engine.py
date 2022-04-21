@@ -53,7 +53,7 @@ def search_dictionary(term , mydict ,stemmer):
 def ranked_results(resault ,rankdict):
 
     for i in resault:
-        rankdict[i[0]] += 1
+        rankdict[i] += 1
 
     newresault = []
     
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     if isphrase == True:
         #phrase search
         search_terms =  myinput.pop(0)
-        print(search_terms)
+        # print(search_terms)
         search_terms = normelizer(search_terms,stemmer ,mystopwordset)
         chunklist = []
         for i in range(1,len(search_terms)):
@@ -250,14 +250,15 @@ if __name__ == "__main__":
                 continue
             
             whichunk += 1
-        print(resault)
+
+        # print(resault)
                     
 
 
     if len(myinput) > 0:
         # seperate words search 
         search_terms = myinput.pop(0)
-        print(search_terms)
+        # print(search_terms)
         search_terms =  list(filter(None, search_terms.split(' ')))
         intersect_list = []
         subtract_list = []
@@ -275,21 +276,20 @@ if __name__ == "__main__":
                 continue
             intersect_list.append(search_dictionary(i , mydict ,stemmer))
 
-        resault = intersect_list.pop()[1]
+        combinelist = intersect_list.pop()[1]
         for i in intersect_list:
-            resault = intersect(i[1], resault)
+            combinelist = intersect2(i[1], combinelist ,0)
         for i in subtract_list:
-            resault = subtract(resault ,i[1])
+            combinelist = subtract(combinelist ,i[1])
         
-        print(resault)
+        for i in combinelist:
+            resault.append(i[0])
+
+        # print(resault)
 
 
-
-    # resault = search_dictionary(search_terms[0] , mydict ,stemmer)
-
-    # print(resault)
-    # ranked = ranked_results(resault ,rankdict)
-    # print(ranked)
+    ranked = ranked_results(resault ,rankdict)
+    print(ranked)
 
     
     
