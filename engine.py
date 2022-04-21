@@ -1,4 +1,7 @@
 
+# 1.combine two way searching -> done
+# 2.buil valid output
+
 
 import chunk
 import json
@@ -181,6 +184,7 @@ if __name__ == "__main__":
     mystopwordset = set(stopwords_list())
     rankdict = defaultdict(int)
     resault = []
+    isphrase = False
 
     create_dectionary(mydict ,stemmer ,mystopwordset)
 
@@ -189,8 +193,14 @@ if __name__ == "__main__":
     myinput = input()
 
     if myinput[0] == '"':
+        isphrase = True
+
+    myinput = list(filter(None, myinput.split('"')))
+
+    if isphrase == True:
         #phrase search
-        search_terms =  myinput.replace('"',' ')
+        search_terms =  myinput.pop(0)
+        print(search_terms)
         search_terms = normelizer(search_terms,stemmer ,mystopwordset)
         chunklist = []
         for i in range(1,len(search_terms)):
@@ -240,12 +250,15 @@ if __name__ == "__main__":
                 continue
             
             whichunk += 1
+        print(resault)
                     
 
 
-    else:
+    if len(myinput) > 0:
         # seperate words search 
-        search_terms =  list(filter(None, myinput.split(' ')))
+        search_terms = myinput.pop(0)
+        print(search_terms)
+        search_terms =  list(filter(None, search_terms.split(' ')))
         intersect_list = []
         subtract_list = []
         is_sub = 0
@@ -267,12 +280,14 @@ if __name__ == "__main__":
             resault = intersect(i[1], resault)
         for i in subtract_list:
             resault = subtract(resault ,i[1])
+        
+        print(resault)
 
 
 
     # resault = search_dictionary(search_terms[0] , mydict ,stemmer)
 
-    print(resault)
+    # print(resault)
     # ranked = ranked_results(resault ,rankdict)
     # print(ranked)
 
