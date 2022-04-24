@@ -6,6 +6,7 @@ from hazm import *
 from hazm import stopwords_list
 import string
 from collections import defaultdict
+from parsivar import FindStems
 
 
 def create_dectionary(mydict ,stemmer ,mystopwordset , jsondata):
@@ -21,7 +22,7 @@ def create_dectionary(mydict ,stemmer ,mystopwordset , jsondata):
             if thistoken in mystopwordset or len(thistoken) == 1 :
                 continue
 
-            thistoken = stemmer.stem(thistoken)
+            thistoken = stemmer.convert_to_stem(thistoken)
             
             if len(thistoken) == 0 :
                 continue
@@ -35,11 +36,12 @@ def create_dectionary(mydict ,stemmer ,mystopwordset , jsondata):
                 mydict[thistoken][0] += 1
             
             mydict[thistoken][1].append([i,j]) 
+
     
 
 def search_dictionary(term , mydict ,stemmer):
     
-    term = stemmer.stem(term)
+    term = stemmer.convert_to_stem(term)
     return mydict[term]
 
 
@@ -104,7 +106,8 @@ def normelizer(text,stemmer ,mystopwordset):
     for i in range(len(text)):
         if text[i] in mystopwordset:
             continue
-        stemm = stemmer.stem(text[i])
+        stemm = stemmer.convert_to_stem(text[i])
+        stemm = text[i]
         return_list.append([stemm,i])
     
     return return_list
@@ -173,12 +176,13 @@ def intersect2(list1, list2, index):
 
 if __name__ == "__main__":
 
-    with open("IR_data_news_10.json") as f:
+    with open("IR_data_news_12k.json") as f:
         data = f.read()
     jsondata = json.loads(data)
 
     mydict = defaultdict(list)
-    stemmer = Stemmer()
+    # stemmer = Stemmer()
+    stemmer = FindStems()
     mystopwordset = set(stopwords_list())
     rankdict = defaultdict(int)
     resault1 = []
@@ -272,8 +276,9 @@ if __name__ == "__main__":
             if i == '!':
                 is_sub = 1
                 continue
-            
-            i = stemmer.stem(i)
+
+            i = stemmer.convert_to_stem(i)
+
             search_resualt = search_dictionary(i , mydict ,stemmer)
             if len(search_resualt) == 0:
                 finish()
@@ -314,12 +319,13 @@ if __name__ == "__main__":
 
 
     for i in rankedlist:
+        print()
         print("#############")
         print("Title : ",end='')
         print(jsondata[str(i[0])]['title'])
         print("URL : ",end='')
         print(jsondata[str(i[0])]['url'])
-        print()
+        
         
 
     
