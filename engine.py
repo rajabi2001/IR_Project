@@ -100,14 +100,14 @@ def finish():
 
 def normelizer(text,stemmer ,mystopwordset):
 
-    text = word_tokenize(text.translate(str.maketrans('', '', string.punctuation)))
+    # text = word_tokenize(text.translate(str.maketrans('', '', string.punctuation)))
     text = list(filter(None, text))
     return_list = []
     for i in range(len(text)):
+
         if text[i] in mystopwordset:
             continue
         stemm = stemmer.convert_to_stem(text[i])
-        stemm = text[i]
         return_list.append([stemm,i])
     
     return return_list
@@ -187,6 +187,8 @@ if __name__ == "__main__":
     rankdict = defaultdict(int)
     resault1 = []
     resault2 = []
+    phlist = []
+    splist = []
     isphrase = False
     iscombined = False
 
@@ -196,14 +198,37 @@ if __name__ == "__main__":
     print("enter what you want to search")
     myinput = input()
 
-    if myinput[0] == '"':
-        isphrase = True
+    myinput = list(filter(None, myinput.split(' ')))
 
-    myinput = list(filter(None, myinput.split('"')))
+    dqcontinue = False
+    for i in myinput:
+
+        if i[0] == '"' and isphrase == False:
+            isphrase = True
+            dqcontinue = True
+            i = i.replace('"','')
+            phlist.append(i)
+            continue
+        elif i[-1] == '"' and isphrase == True:
+            dqcontinue = False
+            i = i.replace('"','')
+            phlist.append(i)
+            continue
+        
+
+        if dqcontinue == True:
+            phlist.append(i)
+        else:
+            
+            if i in mystopwordset:
+                continue
+            i = stemmer.convert_to_stem(i)
+            splist.append(i)
+
 
     if isphrase == True:
         #phrase search
-        search_terms =  myinput.pop(0)
+        search_terms =  phlist
         # print(search_terms)
         search_terms = normelizer(search_terms,stemmer ,mystopwordset)
         chunklist = []
@@ -259,15 +284,15 @@ if __name__ == "__main__":
                     
 
 
-    if len(myinput) > 0:
+    if len(splist) > 0:
         # seperate words search 
 
         if isphrase == True:
             iscombined == True
 
-        search_terms = myinput.pop(0)
+        search_terms = splist 
         # print(search_terms)
-        search_terms =  list(filter(None, search_terms.split(' ')))
+        # search_terms =  list(filter(None, search_terms.split(' ')))
 
         intersect_list = []
         subtract_list = []
@@ -321,6 +346,8 @@ if __name__ == "__main__":
     for i in rankedlist:
         print()
         print("#############")
+        print("Doc ID : ",end='')
+        print(i[0])
         print("Title : ",end='')
         print(jsondata[str(i[0])]['title'])
         print("URL : ",end='')
