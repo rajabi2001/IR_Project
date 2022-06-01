@@ -39,7 +39,23 @@ def create_dectionary(mydict ,stemmer ,mystopwordset , jsondata):
                 mydict[thistoken][i][0] += 1
 
 
+def tf_idf(mydict , N):
 
+    for i in mydict.keys():
+
+        nt = len(mydict[i].keys())
+        idf = math.log(N/nt)
+
+        for j in mydict[i].keys():
+            
+            # if type(j) == str:
+            #     continue
+
+            f = mydict[i][j][0]
+            tf = 1 + math.log(f) 
+
+            w = tf * idf
+            mydict[i][j].append(w)
 
             
 
@@ -59,7 +75,7 @@ if __name__ == "__main__":
 
     create_dectionary(mydict ,stemmer ,mystopwordset , jsondata)
 
-    
+    tf_idf(mydict ,len(jsondata))
     
 
     
