@@ -59,8 +59,26 @@ def tf_idf(mydict , N):
 
             
 
+def normelizer(text,stemmer ,mystopwordset):
 
     
+    text = list(filter(None, text))
+    return_list = []
+    for i in range(len(text)):
+
+        if text[i] in mystopwordset:
+            continue
+        stemm = stemmer.convert_to_stem(text[i])
+        # return_list.append([stemm,i])
+        return_list.append(stemm)
+
+    
+    return return_list
+    
+def search_dictionary(term , mydict ,stemmer):
+    
+    term = stemmer.convert_to_stem(term)
+    return mydict[term]
 
 if __name__ == "__main__":
 
@@ -69,13 +87,40 @@ if __name__ == "__main__":
     jsondata = json.loads(data)
 
     mydict = defaultdict(lambda: defaultdict(list))
-    # stemmer = Stemmer()
     stemmer = FindStems()
     mystopwordset = set(stopwords_list())
 
     create_dectionary(mydict ,stemmer ,mystopwordset , jsondata)
 
     tf_idf(mydict ,len(jsondata))
+
+    print("enter what you want to search")
+    myinput = input()
+
+    myinput = list(filter(None, myinput.split(' ')))
+
+    search_terms = normelizer(myinput ,stemmer ,mystopwordset)
+
+    query_w = []
+    query_dict = defaultdict(list)
+
+    for i in search_terms:
+        if len(query_dict[i]) == 0:
+            query_dict[i].append(1)
+        else:
+            query_dict[i][0] += 1
+
+    
+    for i in query_dict.keys():
+        
+        nt = len(mydict[i].keys())
+        idf = math.log(len(jsondata)/nt)
+        tf = 1 + math.log(query_dict[i][0]) 
+        w = tf * idf
+        query_dict[i].append(w)
+    
+    
+
     
 
     
