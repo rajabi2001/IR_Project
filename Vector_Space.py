@@ -129,10 +129,33 @@ def find_docs(term_dict ,terms):
     
     return doc_list
 
+def create_championlist(champion_dict ,term_dict):
+    champion_list = []
+    r = 5
+
+    for term in term_dict.keys():
+        champion_list = []
+
+        for doc in term_dict[term].keys():
+            champion_list.append([doc , term_dict[term][doc][1]])
+
+        champion_list.sort(key=lambda x: x[1],reverse=True)
+        
+        maxindex = min(r,len(champion_list))
+        for i in range(maxindex):
+            docid = champion_list[i][0]
+            w = champion_list[i][1]
+            champion_dict[term][docid].append(0)
+            champion_dict[term][docid].append(w)
+
+
+    return champion_dict
+
+
 
 if __name__ == "__main__":
 
-    with open("IR_data_news_12k.json") as f:
+    with open("IR_data_news_10.json") as f:
         data = f.read()
     jsondata = json.loads(data)
 
@@ -141,8 +164,12 @@ if __name__ == "__main__":
     mystopwordset = set(stopwords_list())
 
     create_dectionary(mydict ,stemmer ,mystopwordset , jsondata)
-
     tf_idf(mydict ,len(jsondata))
+
+
+    mychampion_dict = defaultdict(lambda: defaultdict(list))
+    create_championlist(mychampion_dict ,mydict)
+    mydict = mychampion_dict
 
     print("enter what you want to search")
     myinput = input()
@@ -172,10 +199,6 @@ if __name__ == "__main__":
     doc_dict = defaultdict(lambda: defaultdict(int))
     create_doc_dict(doc_dict ,mydict)
 
-    # print(query_dict)
-    # print("*********")
-    # print(doc_dict)
-    # print("*********")
 
     doc_list = find_docs(mydict , search_terms)
 
@@ -194,7 +217,7 @@ if __name__ == "__main__":
     for i in doc_scored_list[0:5]:
         print()
         # print(score_dict[i])
-        print("#############")
+        print("*************")
         print("Doc ID : ",end='')
         print(i)
         print("Title : ",end='')
