@@ -80,9 +80,59 @@ def search_dictionary(term , mydict ,stemmer):
     term = stemmer.convert_to_stem(term)
     return mydict[term]
 
+def create_doc_dict(doc_dict ,term_dict ):
+
+    for i in term_dict.keys():
+
+        for j in term_dict[i].keys():
+
+            doc_dict[j][i] = term_dict[i][j][1]
+
+def cosine(q ,d):
+    # q is the dictionary of query term weights
+    # d is the dictionary of document term weights
+
+    numerator = 0
+    sumq2 = 0
+    sumd2 = 0
+    for term in q.keys():
+
+        numerator += q[term][1] * d[term]
+        sumq2 += (q[term][1] ** 2)
+
+    for term in d.keys():
+        sumd2 += (d[term] ** 2)
+
+    denomirator = math.sqrt(sumq2) * math.sqrt(sumd2)
+    return numerator / denomirator
+
+def find_docs(term_dict ,terms):
+    
+    tmp_dict = defaultdict(int)
+    total_term = len(terms)
+    # print(total_term)
+    rateofpresence = 0.5
+
+    for term in terms:
+
+        for doc in term_dict[term].keys():
+            tmp_dict[doc] += 1
+
+    doc_list = []
+
+    for doc in tmp_dict.keys():
+        
+        if total_term <= 3 or (tmp_dict[doc] / total_term >= rateofpresence) :
+            doc_list.append(doc)
+            # print(tmp_dict[doc])
+
+    
+    return doc_list
+
+
 if __name__ == "__main__":
 
-    with open("IR_data_news_10.json") as f:
+    with open("IR_data_news_12k.json") as f:
         data = f.read()
     jsondata = json.loads(data)
 
@@ -118,6 +168,41 @@ if __name__ == "__main__":
         tf = 1 + math.log(query_dict[i][0]) 
         w = tf * idf
         query_dict[i].append(w)
+
+    doc_dict = defaultdict(lambda: defaultdict(int))
+    create_doc_dict(doc_dict ,mydict)
+
+    # print(query_dict)
+    # print("*********")
+    # print(doc_dict)
+    # print("*********")
+
+    doc_list = find_docs(mydict , search_terms)
+
+    score_dict = dict()
+    for doc in doc_list:
+        score_dict[doc] = cosine(query_dict , doc_dict[doc])
+
+    # print(score_dict)
+
+    doc_scored_list = list(score_dict.keys())
+    doc_scored_list.sort(key=lambda x: score_dict[x],reverse=True)
+
+    # print(doc_scored_list)
+
+
+    for i in doc_scored_list[0:5]:
+        print()
+        # print(score_dict[i])
+        print("#############")
+        print("Doc ID : ",end='')
+        print(i)
+        print("Title : ",end='')
+        print(jsondata[str(i)]['title'])
+        print("URL : ",end='')
+        print(jsondata[str(i)]['url'])
+
+
     
     
 
