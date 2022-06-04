@@ -131,7 +131,7 @@ def find_docs(term_dict ,terms):
 
 def create_championlist(champion_dict ,term_dict):
     champion_list = []
-    r = 5
+    r = 10
 
     for term in term_dict.keys():
         champion_list = []
@@ -155,7 +155,7 @@ def create_championlist(champion_dict ,term_dict):
 
 if __name__ == "__main__":
 
-    with open("IR_data_news_10.json") as f:
+    with open("IR_data_news_12k.json") as f:
         data = f.read()
     jsondata = json.loads(data)
 
@@ -171,59 +171,63 @@ if __name__ == "__main__":
     create_championlist(mychampion_dict ,mydict)
     mydict = mychampion_dict
 
-    print("enter what you want to search")
-    myinput = input()
+    while True:
 
-    myinput = list(filter(None, myinput.split(' ')))
+        print("enter what you want to search")
+        myinput = input()
 
-    search_terms = normelizer(myinput ,stemmer ,mystopwordset)
+        myinput = list(filter(None, myinput.split(' ')))
 
-    query_w = []
-    query_dict = defaultdict(list)
+        search_terms = normelizer(myinput ,stemmer ,mystopwordset)
 
-    for i in search_terms:
-        if len(query_dict[i]) == 0:
-            query_dict[i].append(1)
-        else:
-            query_dict[i][0] += 1
+        query_w = []
+        query_dict = defaultdict(list)
 
-    
-    for i in query_dict.keys():
+        for i in search_terms:
+            if len(query_dict[i]) == 0:
+                query_dict[i].append(1)
+            else:
+                query_dict[i][0] += 1
+
         
-        nt = len(mydict[i].keys())
-        idf = math.log(len(jsondata)/nt)
-        tf = 1 + math.log(query_dict[i][0]) 
-        w = tf * idf
-        query_dict[i].append(w)
+        for i in query_dict.keys():
+            
+            nt = len(mydict[i].keys())
+            idf = math.log(len(jsondata)/nt)
+            tf = 1 + math.log(query_dict[i][0]) 
+            w = tf * idf
+            query_dict[i].append(w)
 
-    doc_dict = defaultdict(lambda: defaultdict(int))
-    create_doc_dict(doc_dict ,mydict)
-
-
-    doc_list = find_docs(mydict , search_terms)
-
-    score_dict = dict()
-    for doc in doc_list:
-        score_dict[doc] = cosine(query_dict , doc_dict[doc])
-
-    # print(score_dict)
-
-    doc_scored_list = list(score_dict.keys())
-    doc_scored_list.sort(key=lambda x: score_dict[x],reverse=True)
-
-    # print(doc_scored_list)
+        doc_dict = defaultdict(lambda: defaultdict(int))
+        create_doc_dict(doc_dict ,mydict)
 
 
-    for i in doc_scored_list[0:5]:
-        print()
-        # print(score_dict[i])
-        print("*************")
-        print("Doc ID : ",end='')
-        print(i)
-        print("Title : ",end='')
-        print(jsondata[str(i)]['title'])
-        print("URL : ",end='')
-        print(jsondata[str(i)]['url'])
+        doc_list = find_docs(mydict , search_terms)
+
+        score_dict = dict()
+        for doc in doc_list:
+            score_dict[doc] = cosine(query_dict , doc_dict[doc])
+
+        # print(score_dict)
+
+        doc_scored_list = list(score_dict.keys())
+        doc_scored_list.sort(key=lambda x: score_dict[x],reverse=True)
+
+        # print(doc_scored_list)
+
+
+        for i in doc_scored_list[0:5]:
+            print()
+            # print(score_dict[i])
+            print("*************")
+            print("Doc ID : ",end='')
+            print(i)
+            print("Title : ",end='')
+            print(jsondata[str(i)]['title'])
+            # print("content : ",end='')
+            # print(jsondata[str(i)]['content'])
+            print("URL : ",end='')
+            print(jsondata[str(i)]['url'])
 
 
     

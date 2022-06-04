@@ -350,6 +350,8 @@ if __name__ == "__main__":
         print(i[0])
         print("Title : ",end='')
         print(jsondata[str(i[0])]['title'])
+        print("content : ",end='')
+        print(jsondata[str(i[0])]['content'])
         print("URL : ",end='')
         print(jsondata[str(i[0])]['url'])
         
